@@ -1,13 +1,13 @@
-import { shallowMount } from '@vue/test-utils'
-import Home from '@/components/home.vue'
+import Home from './home.vue'
+import vue from 'vue'
 
-describe('Home.vue', () => {
-  it('Menampilkan pesan ketika data sudah di submit', () => {
-    const wrapper = shallowMount(Home)
+describe('@views/home', () => {
+  it('is a valid view', () => {
+    expect(Home).toBeAViewComponent()
+  })
 
-    wrapper.find("#name").setValue("10.00")
-    // wrapper.find("button").trigger("click")
-
-    expect(wrapper.find("#name").val()).toBe("Thank You fulana")
+  it('renders an element', () => {
+    const { element } = shallowMountView(Home)
+    expect(element.textContent).toContain('Aplikasi Foreign Exchange Currency')
   })
 })

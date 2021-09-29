@@ -1,69 +1,43 @@
 <script>
-// import appConfig from '@src/app.config'
+import appConfig from '@src/app.config'
 import Layout from '@layouts/main.vue'
-var his = {to:'USD', val:'10.00'};
-
-const data = {
-  money : [
-    {
-      name : 'USD'
-    },
-    {
-      name : 'CAD'
-    },
-    {
-      name : 'IDR'
-    },
-    {
-      name : 'GBP'
-    },
-    {
-      name : 'CHF'
-    },
-    {
-      name : 'SGD'
-    },
-    {
-      name : 'INR'
-    },
-    {
-      name : 'MYR'
-    },
-    {
-      name : 'JPY'
-    },
-    {
-      name : 'KRW'
-    }
-  ],
-  his:his,
-  res:[],
-  listCurrency:[],
-  listCountry:[],
-  number:1
-}
+import {mapActions, mapState} from 'vuex'
 
 export default {
   page: {
     title: 'Home',
-    // meta: [{ name: 'description', content: baseUrl }],
+    meta: [{ name: 'description', content: appConfig.description }],
   },
   components: { Layout },
-  data:function(params) {
-    return data
+  data(){
+    return {
+      his:{to:'USD', val:'10.00'},
+      res:[],
+      listCurrency:[],
+      listCountry:[],
+      number:1
+    }
+  },
+  computed:{
+    ...mapState('exchange',['list', 'country'])
   },
   mounted() {
-    this.$store.dispatch('exchange/getCurrency').then((response) => {
-      this.listCurrency = this.$store.state.exchange.list
-    })
-    this.$store.dispatch('exchange/getCountry').then((response) => {
-      this.listCountry = this.$store.state.exchange.country
-    })
+    Promise.all([this.getCurrency(), this.getCountry()])
+      .then(values => {
+        this.listCurrency = values[0]
+        this.listCountry = values[1]
+      })
+      .catch(error => {
+        this.errormsg = error.response.data.message;
+        this.loading = false;
+      });
   },
   created(){
-
+      this.listCurrency = this.getCurrency()
+      this.listCountry = this.getCountry()
   },
   methods:{
+    ...mapActions('exchange',['getCurrency','getCountry']),
     submitexchange:function() {
       const selectedMoney = this.his.to
       const listCurrency = this.listCurrency
@@ -93,15 +67,14 @@ export default {
     }
   }
 }
-
 </script>
 
 <template>
   <Layout>
-  <h2>Aplikasi <i>Foreign Exchange Currency</i></h2>
-  <form style="margin-top:10px;" @submit.prevent="submitexchange">
+    <h1>Aplikasi Foreign Exchange Currency</h1>
+    <form style="margin-top:10px;" @submit.prevent="submitexchange">
     <select id="" v-model="his.to">
-      <option v-for="(item, index) in listCurrency" :key="index" :value="index">{{index}}</option>
+      <option v-for="(item, index) in list" :key="index" :value="index">{{index}}</option>
     </select>
     <input id="val-price" v-model="his.val" type="text" value="10.00">
     <input type="submit" value="Submit">
@@ -113,7 +86,7 @@ export default {
       <span>{{item.to}} {{numberWithCommas(item.val_converted)}}</span> <br>
       <span>{{item.to}} - {{item.country}}</span><br>
       <span>1 USD = {{item.to}} {{item.per_usd}} </span> <br>
-      <span><a  @click="deleteCurrency(item.id)">Delete</a></span>
+      <span><a  @click="deleteCurrency(item.id)">Hapus</a></span>
     </div><br/>
   </div>
   <p v-else>Tidak ada data</p>

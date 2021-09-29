@@ -1,6 +1,12 @@
 import axios from 'axios'
 
-export const mutations = {
+var state = {
+  list:[]
+};
+
+const getters = {};
+
+const mutations = {
   LIST_CURRENCY(state, currency){
     state.list = currency
   },
@@ -9,7 +15,7 @@ export const mutations = {
   },
 }
 
-export const actions = {
+const actions = {
   getCurrency({ commit, state, rootState }){
     return axios
       .get('https://api.fastforex.io/fetch-all?api_key=b1d25e5144-8fdf9c2564-r03r2f')
@@ -28,4 +34,12 @@ export const actions = {
         return country
       })
   },
+}
+
+export default {
+  namespaced:true,
+  state,
+  getters,
+  actions,
+  mutations
 }
